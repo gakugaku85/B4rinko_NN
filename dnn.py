@@ -1,3 +1,4 @@
+import argparse
 import gzip
 import os
 import pickle
@@ -13,8 +14,9 @@ from urllib3 import request
 
 # from tkinter.tix import X_REGION
 
-
-np.random.seed(0)
+seed_value = 0
+np.random.seed(seed_value)
+random.seed(seed_value)
 
 url_base = 'http://yann.lecun.com/exdb/mnist/'
 key_file = {
@@ -34,7 +36,13 @@ if not os.path.isdir(DATA_PATH):
         print("Loading >> {}".format(file_path))
         request.urlretrieve(url_base + v, file_path)
 
-SAVE_RESULT_PATH = "./result/"
+def get_timestamp():
+    import datetime
+    now = datetime.datetime.now()
+    return now.strftime('%Y%m%d%H%M%S')
+
+SAVE_RESULT_PATH = "./result/" + get_timestamp() + "/"
+
 if not os.path.isdir(SAVE_RESULT_PATH):
     os.makedirs(SAVE_RESULT_PATH)
 
@@ -90,7 +98,7 @@ def activation(X, w, b):
 
 class DeepNeuralNetwork:
 
-    def __init__(self, shape_list=[784, 100, 10], eta=1.0):
+    def __init__(self, shape_list=[784, 100, 10], eta=0.01):
         self.weight_list, self.bias_list = self.make_params(shape_list)
         self.eta = eta
 
@@ -111,7 +119,7 @@ class DeepNeuralNetwork:
         y_1 = sigmoid(a_1)
         a_2 = inner_product(y_1, self.weight_list[1], self.bias_list[1]) # (N, 10)
         y_2 = sigmoid(a_2) #来年ソフトマックスにする
-        y_2 /= np.sum(y_2, axis=1, keepdims=True) # ここで簡単な正規化をはさむ
+        # y_2 /= np.sum(y_2, axis=1, keepdims=True) # ここで簡単な正規化をはさむ これを消してみた
         S = 1/(2*len(y_2))*(y_2 - t)**2 #来年クロスエントロピー誤差にしゅる
         L = np.sum(S)
         val_list['a_1'] = a_1
@@ -230,10 +238,27 @@ def max_vali_cnf(dnn, X_test, t_test, test_num):
 
 def main():
 
-    epochs = 100
-    batch_size = 10
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-b', '--batch_size', type=str, default='10',
+                        help='batch size for training')
+    parser.add_argument('-eta', '--eta', type=str, default='0.1',
+                        help='learning rate for training')
+    parser.add_argument('-e', '--epochs', type=str, default='100',
+                        help='Number of epochs for training')
+    
 
-    dnn = DeepNeuralNetwork()
+    # parse configs
+    args = parser.parse_args()
+    batch_size = int(args.batch_size)
+    eta = float(args.eta)
+    epochs = int(args.epochs)
+
+    printargs = vars(args)
+    print("Arguments are:")
+    for k, v in printargs.items():
+        print("\t{}: {}".format(k, v))
+
+    dnn = DeepNeuralNetwork(eta=eta)
 
     dataset = load_mnist()
 
@@ -283,7 +308,8 @@ def main():
         acc_vali = dnn.accuracy(X_val, t_val)
         loss_vali = dnn.loss(X_val, t_val)
 
-        print("Epoch: %d, Accuracy: %f, Loss: %f" % (epoch+1, acc_vali, loss_vali))
+        # print("Epoch: %d, Accuracy: %f, Loss: %f" % (epoch+1, acc_vali, loss_vali))
+        print("Epoch: %d, train_Accuracy: %f, train_Loss: %f, vali_Accuracy: %f, vali_Loss: %f" % (epoch+1, acc_train, loss_train, acc_vali, loss_vali))
         results.append([epoch+1, acc_train, loss_train, acc_vali, loss_vali])
 
         acc_vali_list.append(acc_vali)
