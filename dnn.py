@@ -1,4 +1,5 @@
 import argparse
+import ast
 import gzip
 import os
 import pickle
@@ -89,12 +90,25 @@ def load_mnist():
 def sigmoid(x):  # シグモイド関数
     return 1 / (1 + np.exp(-x))
 
+def softmax(x):
+    c = np.max(x) # 最大値
+    exp_a = np.exp(i-c) # 分子:オーバーフロー対策
+    for i in range(len(exp_a)):
+        print(i)
+        input()
+        sum_exp_a = np.sum(exp_a) # 分母
+    y = exp_a / sum_exp_a # 式(3.10)
+    return y
+
 def inner_product(X, w, b):  # ここは内積とバイアスを足し合わせる
     return np.dot(X, w) + b
 
 def activation(X, w, b):
     return sigmoid(inner_product(X, w, b))
 
+def cross_entropy_error(y, t):
+    delta = 1e-7 # log(0)にならないように微小値を足しておく
+    return -np.sum(t * np.log(y + delta)) / y.shape[0]
 
 class DeepNeuralNetwork:
 
@@ -118,10 +132,11 @@ class DeepNeuralNetwork:
         a_1 = inner_product(X, self.weight_list[0], self.bias_list[0]) # (N, 1000)
         y_1 = sigmoid(a_1)
         a_2 = inner_product(y_1, self.weight_list[1], self.bias_list[1]) # (N, 10)
-        y_2 = sigmoid(a_2) #来年ソフトマックスにする
+        y_2 = sigmoid(a_2)
         # y_2 /= np.sum(y_2, axis=1, keepdims=True) # ここで簡単な正規化をはさむ これを消してみた
-        S = 1/(2*len(y_2))*(y_2 - t)**2 #来年クロスエントロピー誤差にしゅる
+        S = 1/(2*len(y_2))*(y_2 - t)**2 
         L = np.sum(S)
+        # L = cross_entropy_error(y_2, t)
         val_list['a_1'] = a_1
         val_list['y_1'] = y_1
         val_list['a_2'] = a_2
@@ -165,7 +180,7 @@ class DeepNeuralNetwork:
         y_1 = val_list['y_1']
         a_2 = val_list['a_2']
         y_2 = val_list['y_2']
-        S = val_list['S']
+        # S = val_list['S']
         L = val_list['L']
 
         dL_dS = 1.0
@@ -245,6 +260,14 @@ def main():
                         help='learning rate for training')
     parser.add_argument('-e', '--epochs', type=str, default='100',
                         help='Number of epochs for training')
+    parser.add_argument('-shape_list', '--shape_list', type=str, default='[784, 100, 10]',
+                        help='network shape')
+    parser.add_argument('-train_num', '--train_num', type=str, default='50000',
+                        help='Number of training data')
+    parser.add_argument('-vali_num', '--vali_num', type=str, default='10000',
+                        help='Number of validation data')
+    parser.add_argument('-test_num', '--test_num', type=str, default='10000',
+                        help='Number of test data')
     
 
     # parse configs
@@ -252,13 +275,19 @@ def main():
     batch_size = int(args.batch_size)
     eta = float(args.eta)
     epochs = int(args.epochs)
+    shape_list = ast.literal_eval(args.shape_list)
 
     printargs = vars(args)
     print("Arguments are:")
     for k, v in printargs.items():
         print("\t{}: {}".format(k, v))
 
-    dnn = DeepNeuralNetwork(eta=eta)
+    output_args = os.path.join(SAVE_RESULT_PATH, "args.txt")
+    with open(output_args, 'w') as f:
+        for k, v in printargs.items():
+            f.write("{}: {}\n".format(k, v))
+
+    dnn = DeepNeuralNetwork(shape_list, eta)
 
     dataset = load_mnist()
 
@@ -267,9 +296,9 @@ def main():
 
     X_train_val, t_train_val, X_test, t_test = dataset["x_train"], dataset["t_train"], dataset["x_test"], dataset["t_test"]
 
-    train_num = 50000
-    vali_num = 10000
-    test_num = 10000
+    train_num = int(args.train_num)
+    test_num = int(args.test_num)
+    vali_num = int(args.vali_num)
 
     X_train = X_train_val[:train_num, :].copy()
     t_train = t_train_val[:train_num, :].copy()
