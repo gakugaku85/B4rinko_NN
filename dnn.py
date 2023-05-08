@@ -180,7 +180,7 @@ class DeepNeuralNetwork:
         y_1 = val_list['y_1']
         a_2 = val_list['a_2']
         y_2 = val_list['y_2']
-        # S = val_list['S']
+        S = val_list['S']
         L = val_list['L']
 
         dL_dS = 1.0
