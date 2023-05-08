@@ -52,7 +52,7 @@ def load_label(file_name):
     file_path = DATA_PATH + file_name
     with open(file_path, 'rb') as f:
         labels = np.frombuffer(f.read(), np.uint8, offset=8)
-            # 最初の８バイト分はデータ本体ではないので飛
+            # 最初の８バイト分はデータ本体ではないので飛ばす
     one_hot_labels = np.zeros((labels.shape[0], 10))
     for i in range(labels.shape[0]):
         one_hot_labels[i, labels[i]] = 1
@@ -366,3 +366,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #test commit push
