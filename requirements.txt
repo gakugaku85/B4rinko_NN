@@ -4,3 +4,16 @@ pandas
 scikit-learn
 urllib
 gzip
+ast
+pickle
+time
+random
+argparse
+os
+sys
+gensim
+sklearn
+scipy
+```
+```
+
