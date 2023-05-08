@@ -42,7 +42,7 @@ def get_timestamp():
     now = datetime.datetime.now()
     return now.strftime('%Y%m%d%H%M%S')
 
-SAVE_RESULT_PATH = "./result/" + get_timestamp() + "/"
+SAVE_RESULT_PATH = "./result/dnn_" + get_timestamp() + "/"
 
 if not os.path.isdir(SAVE_RESULT_PATH):
     os.makedirs(SAVE_RESULT_PATH)
@@ -337,7 +337,6 @@ def main():
         acc_vali = dnn.accuracy(X_val, t_val)
         loss_vali = dnn.loss(X_val, t_val)
 
-        # print("Epoch: %d, Accuracy: %f, Loss: %f" % (epoch+1, acc_vali, loss_vali))
         print("Epoch: %d, train_Accuracy: %f, train_Loss: %f, vali_Accuracy: %f, vali_Loss: %f" % (epoch+1, acc_train, loss_train, acc_vali, loss_vali))
         results.append([epoch+1, acc_train, loss_train, acc_vali, loss_vali])
 
@@ -367,3 +366,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    #test commit push
