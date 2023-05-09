@@ -14,7 +14,8 @@ mnistデータセットをdeep neural networkによってテストデータを�
 
 実行方法をargsで入力できるようにしました（関口）
 resultファイルをタイムスタンプでファイル訳するようにして、argsをtxtで出力するようにしました
-sample
+
+### sample
 ```
 python3 dnn.py -b 100 -eta 0.1 -e 100 -train_num 50000 -vali_num 10000 -test_num 10000
 ```
