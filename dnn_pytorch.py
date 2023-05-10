@@ -166,6 +166,15 @@ def plot_accuracy_train_val(path, t_acc, v_acc):
     plt.savefig(path + 'accuracy.png')
     plt.cla()
 
+def get_df_and_csv(result, columns, file_name):
+
+    df = pd.DataFrame(result, columns=columns)
+
+    print("Saving ==>> {}".format(file_name))
+    df.to_csv(file_name, index=False)
+
+    return df
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--batch_size', type=int, default=10)
@@ -232,6 +241,9 @@ def main():
     validation_loss_list = []
     validation_accuracy_list = []
 
+    columns = ["Epoch", "acc_train", "loss_train", "acc_vali", "loss_vali"]
+    results = []
+
     for epoch in range(epochs):
         print('Epoch {}/{}'.format(epoch + 1, epochs))
         print('-------------')
@@ -260,11 +272,16 @@ def main():
         validation_accuracy_list.append(validation_accuracy)
         print('Validation Loss: {} Accuracy: {}'.format(validation_loss, validation_accuracy))
 
+        results.append([epoch+1, train_accuracy, train_loss.item(), validation_accuracy, validation_loss.item()])
+
     plot_loss_train_val(SAVE_RESULT_PATH, train_loss_list, validation_loss_list)
     plot_accuracy_train_val(SAVE_RESULT_PATH, train_accuracy_list, validation_accuracy_list)
 
     test_loss, test_accuracy = calculate_loss_and_accuracy(net, criterion, x_test, t_test)
     print('Test Loss: {} Accuracy: {}'.format(test_loss, test_accuracy))
+
+    file_name = os.path.join(SAVE_RESULT_PATH, "dnn_result.csv")
+    df = get_df_and_csv(results, columns, file_name)
 
     outputs = net(x_test)
     _, predicts = torch.max(outputs, 1)
