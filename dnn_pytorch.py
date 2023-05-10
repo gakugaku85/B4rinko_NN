@@ -126,8 +126,9 @@ def plot_result(path, images, labels, predicts):
     for i in range(25):
         plt.subplot(5, 5, i + 1)
         plt.imshow(images[i].reshape(28, 28), cmap='gray')
-        plt.title('label:{}, predict:{}'.format(labels[i], predicts[i]))
+        plt.title('label:{} \n predict:{}'.format(labels[i], predicts[i]))
         plt.axis('off')
+        plt.subplots_adjust(wspace=2.0, hspace=2.0)
     plt.savefig(path + 'result.png')
 
 def calculate_loss_and_accuracy(model, criterion, x, t):
